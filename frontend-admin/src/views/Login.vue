@@ -94,15 +94,6 @@
           <span>还没有账号？</span>
           <router-link to="/register" class="register-link">立即注册</router-link>
         </div>
-
-        <div class="demo-accounts">
-          <p class="demo-title">演示账号</p>
-          <div class="demo-list">
-            <span class="demo-item" @click="fillDemo('admin', 'admin123')">管理员</span>
-            <span class="demo-item" @click="fillDemo('leader', 'leader123')">负责人</span>
-            <span class="demo-item" @click="fillDemo('student', 'student123')">学生</span>
-          </div>
-        </div>
       </div>
     </div>
   </div>
@@ -129,11 +120,6 @@ const form = reactive({
 const rules = {
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
-}
-
-const fillDemo = (username, password) => {
-  form.username = username
-  form.password = password
 }
 
 const handleLogin = async () => {
@@ -366,39 +352,6 @@ const handleLogin = async () => {
 
 .register-link:hover {
   color: #764ba2;
-}
-
-.demo-accounts {
-  padding-top: 24px;
-  border-top: 1px solid #e2e8f0;
-}
-
-.demo-title {
-  text-align: center;
-  color: #94a3b8;
-  font-size: 13px;
-  margin-bottom: 12px;
-}
-
-.demo-list {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-}
-
-.demo-item {
-  padding: 8px 16px;
-  background: #f1f5f9;
-  border-radius: 8px;
-  font-size: 13px;
-  color: #64748b;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.demo-item:hover {
-  background: #667eea;
-  color: #fff;
 }
 
 /* 响应式 */
