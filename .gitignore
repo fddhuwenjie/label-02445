@@ -1,0 +1,114 @@
+# ==================== Java / Maven ====================
+# Compiled class files
+*.class
+
+# Log files
+*.log
+
+# Package files
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Maven
+backend/target/
+backend/.mvn/
+backend/mvnw
+backend/mvnw.cmd
+!backend/.mvn/wrapper/maven-wrapper.jar
+
+# Gradle
+.gradle/
+build/
+
+# ==================== Node.js / npm ====================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Frontend build output
+frontend-admin/dist/
+frontend-admin/node_modules/
+frontend-user/dist/
+frontend-user/node_modules/
+frontend-mp/dist/
+frontend-mp/node_modules/
+
+# ==================== IDE ====================
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Eclipse
+.classpath
+.project
+.settings/
+bin/
+
+# NetBeans
+nbproject/private/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# ==================== OS ====================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+# ==================== Docker ====================
+# Docker volumes
+data/
+mysql-data/
+
+# ==================== Environment ====================
+.env
+.env.local
+.env.*.local
+*.env
+
+# ==================== Logs ====================
+logs/
+*.log
+npm-debug.log*
+
+# ==================== Temporary files ====================
+tmp/
+temp/
+*.tmp
+*.temp
+*.swp
+*.swo
+
+# ==================== Test ====================
+coverage/
+.nyc_output/
+
+# ==================== Misc ====================
+*.bak
+*.backup
