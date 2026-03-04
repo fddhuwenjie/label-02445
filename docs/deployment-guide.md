@@ -1,5 +1,13 @@
 # 学生社团管理系统 - 部署指南
 
+## 0. 部署形态说明
+
+**默认部署方式**：项目默认打包为**可执行 JAR**（内嵌 Tomcat），通过 `java -jar` 或 `mvn spring-boot:run` 运行，**非** Tomcat 9 独立 WAR 部署。
+
+若需部署到独立 Tomcat 9 服务器，需**手动修改 POM**（见第 5 节），非开箱即用。
+
+---
+
 ## 1. 环境要求
 
 ### 1.1 开发环境
@@ -118,16 +126,15 @@ npm run dev
 
 ---
 
-## 5. Tomcat部署（可选）
+## 5. Tomcat 9 WAR 部署（可选，需手动改 POM）
 
-### 5.1 打包WAR
+### 5.1 打包 WAR
 
-修改 `pom.xml`：
-```xml
-<packaging>war</packaging>
-```
+当前默认打包为 JAR，需**手动修改** `backend/pom.xml`：
 
-添加依赖：
+1. 将 `<packaging>jar</packaging>` 改为 `<packaging>war</packaging>`
+2. 添加 `spring-boot-starter-tomcat` 的 `provided` 依赖（由外部 Tomcat 提供）
+
 ```xml
 <dependency>
     <groupId>org.springframework.boot</groupId>
@@ -136,16 +143,16 @@ npm run dev
 </dependency>
 ```
 
-打包：
+3. 打包：
 ```bash
 mvn clean package -DskipTests
 ```
 
-### 5.2 部署到Tomcat
+### 5.2 部署到 Tomcat 9
 
-1. 将生成的WAR文件复制到Tomcat的webapps目录
-2. 启动Tomcat
-3. 访问：http://localhost:8080/student-club-backend
+1. 将生成的 `student-club-backend-1.0.0.war` 复制到 Tomcat 的 `webapps` 目录
+2. 启动 Tomcat 9
+3. 访问：http://localhost:8080/student-club-backend-1.0.0
 
 ---
 
@@ -185,16 +192,23 @@ docker-compose build --no-cache
 ### 7.1 安全配置
 
 - 修改默认密码
-- 配置HTTPS
-- 限制数据库访问IP
+- 配置 HTTPS
+- 限制数据库访问 IP
+- **JWT 密钥**：`application.yml` 中 `jwt.secret` 为硬编码，生产环境**不建议**。建议：
+  - 使用环境变量：`JWT_SECRET` 或 `jwt.secret`
+  - 或使用密钥管理服务（如 Vault）
 
-### 7.2 性能优化
+### 7.2 配置说明
+
+- **MyBatis Plus**：`application.yml` 中配置了 `mapper-locations: classpath:mapper/*.xml`，但项目使用注解方式，仓库**无** XML 文件，该配置为冗余，不影响运行。
+
+### 7.3 性能优化
 
 - 配置数据库连接池
-- 启用Redis缓存
-- 配置Nginx负载均衡
+- 启用 Redis 缓存
+- 配置 Nginx 负载均衡
 
-### 7.3 监控告警
+### 7.4 监控告警
 
 - 配置日志收集
 - 设置健康检查

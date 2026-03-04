@@ -177,10 +177,10 @@ docker-compose down
 - 索引设计：主键索引、外键索引、唯一索引
 
 #### 5. 应用系统开发
-- 后端：Spring Boot 3.x + MyBatis Plus
+- 后端：Spring Boot 2.7.18 + MyBatis Plus
 - 前端：Vue 3 + Element Plus
 - 开发工具：IntelliJ IDEA
-- 服务器：Tomcat 9.0（内嵌）
+- 服务器：Tomcat 9.x（Spring Boot 2.7 内嵌）
 
 ---
 
@@ -219,10 +219,12 @@ docker-compose down
 
 ## 技术栈
 
-- **后端**: Java 25, Spring Boot 3.2, MyBatis Plus, MySQL 8.0
+- **后端**: Java 21, Spring Boot 2.7.18, MyBatis Plus, MySQL 8.0
 - **前端**: Vue 3, Vite, Element Plus, Axios
 - **容器化**: Docker, Docker Compose
 - **其他**: JWT 认证, RESTful API
+
+> **版本说明**：课题 Prompt 要求 OpenJDK 25，当前实现采用 Java 21 + Spring Boot 2.7.18，以兼容 Docker 构建及主流运行环境。Spring Boot 2.7 内嵌 Tomcat 9.x，使用 `javax.servlet.*`。
 
 ## 项目结构
 
