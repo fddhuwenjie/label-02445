@@ -20,7 +20,7 @@ docker-compose down
 
 ### 手动运行
 
-1. 确保已安装 JDK 25、Maven、Node.js 18+、MySQL 8.0
+1. 确保已安装 JDK 21、Maven、Node.js 18+、MySQL 8.0
 2. 创建数据库（系统会自动创建表结构）
 3. 修改 `backend/src/main/resources/application.yml` 中的数据库配置
 4. 运行后端：

@@ -1,5 +1,5 @@
 # 多阶段构建 - 支持 ARM 和 X86
-FROM --platform=$BUILDPLATFORM maven:3.9-eclipse-temurin-21 AS builder
+FROM --platform=$BUILDPLATFORM maven:3-eclipse-temurin-21 AS builder
 
 WORKDIR /app
 

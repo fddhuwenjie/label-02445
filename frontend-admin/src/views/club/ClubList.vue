@@ -2,7 +2,7 @@
   <div class="club-list">
     <div class="page-card">
       <div class="card-header">
-        <span class="card-title">社团管理</span>
+        <span class="card-title">{{ isAdmin ? '社团管理' : '社团列表' }}</span>
         <el-button type="primary" @click="$router.push('/clubs/create')">
           <el-icon><Plus /></el-icon>创建社团
         </el-button>
@@ -10,10 +10,15 @@
       
       <div class="search-bar">
         <el-input v-model="keyword" placeholder="搜索社团名称" style="width: 200px" clearable @clear="fetchData" @keyup.enter="fetchData" />
-        <el-select v-model="status" placeholder="状态" style="width: 120px" clearable @change="fetchData">
+        <el-select v-if="isAdmin" v-model="status" placeholder="状态" style="width: 120px" clearable @change="fetchData">
           <el-option label="待审核" :value="0" />
           <el-option label="正常" :value="1" />
           <el-option label="已解散" :value="2" />
+        </el-select>
+        <el-select v-if="!isAdmin" v-model="scope" placeholder="展示范围" style="width: 160px" clearable @change="fetchData">
+          <el-option label="全部社团" value="all" />
+          <el-option label="我加入的" value="joined" />
+          <el-option label="我管理的" value="managed" />
         </el-select>
         <el-button type="primary" @click="fetchData">搜索</el-button>
       </div>
@@ -39,13 +44,14 @@
             {{ formatDate(row.createdAt) }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="200" fixed="right">
+        <el-table-column label="操作" width="250" fixed="right">
           <template #default="{ row }">
             <div class="table-actions">
-              <el-button v-if="row.status === 0 && userStore.user?.role === 'ADMIN'" type="success" size="small" @click="handleAudit(row.id, 1)">通过</el-button>
-              <el-button v-if="row.status === 0 && userStore.user?.role === 'ADMIN'" type="danger" size="small" @click="handleAudit(row.id, 2)">拒绝</el-button>
-              <el-button type="primary" size="small" @click="$router.push(`/clubs/${row.id}/edit`)">编辑</el-button>
-              <el-button type="danger" size="small" @click="handleDelete(row.id)">删除</el-button>
+              <el-button v-if="row.status === 0 && isAdmin" type="success" size="small" @click="handleAudit(row.id, 1)">通过</el-button>
+              <el-button v-if="row.status === 0 && isAdmin" type="danger" size="small" @click="handleAudit(row.id, 2)">拒绝</el-button>
+              <el-button v-if="canManage(row)" type="primary" size="small" @click="$router.push(`/clubs/${row.id}/edit`)">编辑</el-button>
+              <el-button v-if="isAdmin" type="danger" size="small" @click="handleDelete(row.id)">删除</el-button>
+              <el-button v-if="!canManage(row) && row.status === 1" type="primary" size="small" @click="$router.push(`/clubs/${row.id}`)">查看</el-button>
             </div>
           </template>
         </el-table-column>
@@ -65,7 +71,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useUserStore } from '../../stores/user'
 import api from '../../api'
@@ -77,18 +83,44 @@ const clubs = ref([])
 const loading = ref(false)
 const keyword = ref('')
 const status = ref(null)
+const scope = ref('all')
 const page = ref(1)
 const size = ref(10)
 const total = ref(0)
+const myManagedClubIds = ref([])
+
+const isAdmin = computed(() => userStore.user?.role === 'ADMIN')
 
 const formatDate = (date) => dayjs(date).format('YYYY-MM-DD HH:mm')
+
+const canManage = (club) => {
+  if (isAdmin.value) return true
+  return myManagedClubIds.value.includes(club.id)
+}
+
+const fetchMyManagedClubs = async () => {
+  if (isAdmin.value) return
+  try {
+    const res = await api.get('/api/memberships/my', { params: { page: 1, size: 100, status: 1 } })
+    myManagedClubIds.value = res.data.records
+      .filter(m => m.role === 'LEADER' || m.role === 'ADMIN')
+      .map(m => m.clubId)
+  } catch {
+    myManagedClubIds.value = []
+  }
+}
 
 const fetchData = async () => {
   loading.value = true
   try {
-    const res = await api.get('/api/clubs/list', {
-      params: { page: page.value, size: size.value, keyword: keyword.value, status: status.value }
-    })
+    const params = { page: page.value, size: size.value, keyword: keyword.value }
+    if (isAdmin.value) {
+      params.status = status.value
+    } else {
+      params.status = 1
+      if (scope.value && scope.value !== 'all') params.scope = scope.value
+    }
+    const res = await api.get('/api/clubs/list', { params })
     clubs.value = res.data.records
     total.value = res.data.total
   } finally {
@@ -109,5 +141,8 @@ const handleDelete = async (id) => {
   fetchData()
 }
 
-onMounted(fetchData)
+onMounted(async () => {
+  await fetchMyManagedClubs()
+  fetchData()
+})
 </script>

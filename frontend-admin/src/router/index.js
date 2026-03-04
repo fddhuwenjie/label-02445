@@ -54,6 +54,12 @@ const routes = [
         meta: { title: '成员管理' }
       },
       {
+        path: 'my-memberships',
+        name: 'MyMemberships',
+        component: () => import('../views/member/MyMemberships.vue'),
+        meta: { title: '我的社团' }
+      },
+      {
         path: 'activities',
         name: 'Activities',
         component: () => import('../views/activity/ActivityList.vue'),

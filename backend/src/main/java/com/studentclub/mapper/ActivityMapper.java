@@ -8,6 +8,8 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
+import java.util.List;
+
 /**
  * 活动Mapper
  */
@@ -28,4 +30,14 @@ public interface ActivityMapper extends BaseMapper<Activity> {
             "LEFT JOIN t_club c ON a.club_id = c.id " +
             "WHERE a.id = #{id} AND a.deleted = 0")
     Activity selectActivityDetail(@Param("id") Long id);
+    
+    @Select("<script>" +
+            "SELECT a.*, c.name as club_name FROM t_activity a " +
+            "LEFT JOIN t_club c ON a.club_id = c.id " +
+            "WHERE a.deleted = 0 AND a.club_id IN " +
+            "<foreach collection='clubIds' item='id' open='(' separator=',' close=')'>#{id}</foreach>" +
+            "<if test='keyword != null and keyword != \"\"'> AND a.title LIKE CONCAT('%', #{keyword}, '%')</if>" +
+            " ORDER BY a.start_time DESC" +
+            "</script>")
+    IPage<Activity> selectActivityPageByClubIds(Page<Activity> page, @Param("clubIds") List<Long> clubIds, @Param("keyword") String keyword);
 }

@@ -34,8 +34,9 @@ public interface ClubService extends IService<Club> {
     
     /**
      * 分页查询社团
+     * @param scope 非管理员时的展示范围：all-全部, joined-我加入的, managed-我管理的
      */
-    PageResult<Club> pageClubs(Integer page, Integer size, String keyword, Integer status);
+    PageResult<Club> pageClubs(Integer page, Integer size, String keyword, Integer status, String scope, Long userId, String userRole);
     
     /**
      * 审核社团

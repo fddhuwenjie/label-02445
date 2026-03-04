@@ -19,21 +19,25 @@
         </el-menu-item>
         <el-menu-item index="/clubs">
           <el-icon><OfficeBuilding /></el-icon>
-          <span>社团管理</span>
+          <span>{{ isAdmin ? '社团管理' : '社团列表' }}</span>
         </el-menu-item>
-        <el-menu-item index="/members">
+        <el-menu-item index="/my-memberships">
+          <el-icon><Tickets /></el-icon>
+          <span>我的社团</span>
+        </el-menu-item>
+        <el-menu-item v-if="isAdmin || hasManagedClubs" index="/members">
           <el-icon><User /></el-icon>
           <span>成员管理</span>
         </el-menu-item>
         <el-menu-item index="/activities">
           <el-icon><Calendar /></el-icon>
-          <span>活动管理</span>
+          <span>{{ isAdmin ? '活动管理' : '活动列表' }}</span>
         </el-menu-item>
         <el-menu-item index="/announcements">
           <el-icon><Bell /></el-icon>
-          <span>公告管理</span>
+          <span>{{ isAdmin ? '公告管理' : '公告列表' }}</span>
         </el-menu-item>
-        <el-menu-item v-if="userStore.user?.role === 'ADMIN'" index="/users">
+        <el-menu-item v-if="isAdmin" index="/users">
           <el-icon><UserFilled /></el-icon>
           <span>用户管理</span>
         </el-menu-item>
@@ -77,13 +81,31 @@
 </template>
 
 <script setup>
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
 import { ElMessageBox } from 'element-plus'
+import api from '../api'
 
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
+const hasManagedClubs = ref(false)
+
+const isAdmin = computed(() => userStore.user?.role === 'ADMIN')
+
+const checkManagedClubs = async () => {
+  if (isAdmin.value) {
+    hasManagedClubs.value = true
+    return
+  }
+  try {
+    const res = await api.get('/api/memberships/my', { params: { page: 1, size: 100, status: 1 } })
+    hasManagedClubs.value = res.data.records.some(m => m.role === 'LEADER' || m.role === 'ADMIN')
+  } catch {
+    hasManagedClubs.value = false
+  }
+}
 
 const handleCommand = (command) => {
   if (command === 'logout') {
@@ -99,6 +121,8 @@ const handleCommand = (command) => {
     router.push('/profile')
   }
 }
+
+onMounted(checkManagedClubs)
 </script>
 
 <style scoped>

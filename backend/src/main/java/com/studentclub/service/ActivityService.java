@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.studentclub.common.PageResult;
 import com.studentclub.dto.ActivityDTO;
 import com.studentclub.entity.Activity;
+import com.studentclub.entity.Registration;
 
 /**
  * 活动服务接口
@@ -32,8 +33,9 @@ public interface ActivityService extends IService<Activity> {
     
     /**
      * 分页查询活动
+     * @param managedOnly 仅查询当前用户管理的社团的活动（需传入 userId）
      */
-    PageResult<Activity> pageActivities(Integer page, Integer size, Long clubId, String keyword);
+    PageResult<Activity> pageActivities(Integer page, Integer size, Long clubId, String keyword, Boolean managedOnly, Long userId);
     
     /**
      * 报名活动
@@ -49,4 +51,9 @@ public interface ActivityService extends IService<Activity> {
      * 更新活动状态
      */
     void updateStatus(Long id, Integer status);
+    
+    /**
+     * 获取活动报名列表
+     */
+    PageResult<Registration> getActivityRegistrations(Long activityId, Integer page, Integer size);
 }

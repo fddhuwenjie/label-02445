@@ -14,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import java.time.LocalDateTime;
 
 /**
@@ -188,5 +190,28 @@ public class MembershipServiceImpl extends ServiceImpl<MembershipMapper, Members
                 .eq(Membership::getUserId, userId)
                 .eq(Membership::getStatus, 1)
                 .in(Membership::getRole, "LEADER", "ADMIN")) > 0;
+    }
+    
+    @Override
+    public List<Long> getManagedClubIds(Long userId) {
+        return list(new LambdaQueryWrapper<Membership>()
+                .eq(Membership::getUserId, userId)
+                .eq(Membership::getStatus, 1)
+                .in(Membership::getRole, "LEADER", "ADMIN"))
+                .stream()
+                .map(Membership::getClubId)
+                .distinct()
+                .collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<Long> getJoinedClubIds(Long userId) {
+        return list(new LambdaQueryWrapper<Membership>()
+                .eq(Membership::getUserId, userId)
+                .eq(Membership::getStatus, 1))
+                .stream()
+                .map(Membership::getClubId)
+                .distinct()
+                .collect(Collectors.toList());
     }
 }

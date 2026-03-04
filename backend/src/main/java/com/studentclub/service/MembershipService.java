@@ -58,4 +58,14 @@ public interface MembershipService extends IService<Membership> {
      * 检查用户是否是社团管理员
      */
     boolean isClubAdmin(Long clubId, Long userId);
+    
+    /**
+     * 获取用户拥有管理权限的社团ID列表（LEADER 或 ADMIN 角色）
+     */
+    java.util.List<Long> getManagedClubIds(Long userId);
+    
+    /**
+     * 获取用户已加入的社团ID列表（status=1）
+     */
+    java.util.List<Long> getJoinedClubIds(Long userId);
 }

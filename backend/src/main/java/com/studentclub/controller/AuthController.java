@@ -4,7 +4,7 @@ import com.studentclub.common.Result;
 import com.studentclub.dto.LoginDTO;
 import com.studentclub.dto.RegisterDTO;
 import com.studentclub.service.UserService;
-import jakarta.validation.Valid;
+import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

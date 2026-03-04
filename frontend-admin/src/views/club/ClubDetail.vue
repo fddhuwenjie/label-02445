@@ -12,10 +12,19 @@
               <span><el-icon><UserFilled /></el-icon> {{ club.memberCount }} 名成员</span>
             </div>
           </div>
-          <div>
+          <div class="detail-actions">
             <el-tag :type="club.status === 1 ? 'success' : club.status === 0 ? 'warning' : 'danger'" size="large">
               {{ club.status === 1 ? '正常' : club.status === 0 ? '待审核' : '已解散' }}
             </el-tag>
+            <template v-if="club.status === 1">
+              <el-button v-if="!membershipStatus && !checkingMembership" type="primary" @click="handleApplyJoin" :loading="applyingJoin">
+                申请加入
+              </el-button>
+              <el-tag v-else-if="membershipStatus === 'pending'" type="warning" size="large">申请中</el-tag>
+              <el-button v-else-if="membershipStatus === 'member'" type="danger" plain @click="handleQuit" :loading="quitting">
+                退出社团
+              </el-button>
+            </template>
           </div>
         </div>
         
@@ -52,7 +61,7 @@
             {{ row.joinedAt ? formatDate(row.joinedAt) : '-' }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="150">
+        <el-table-column v-if="isClubAdmin" label="操作" width="150">
           <template #default="{ row }">
             <el-button v-if="row.status === 0" type="success" size="small" @click="handleAudit(row.id, 1)">通过</el-button>
             <el-button v-if="row.status === 0" type="danger" size="small" @click="handleAudit(row.id, 2)">拒绝</el-button>
@@ -65,16 +74,23 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { useUserStore } from '../../stores/user'
 import api from '../../api'
 import dayjs from 'dayjs'
 
 const route = useRoute()
+const userStore = useUserStore()
 const club = ref({})
 const members = ref([])
 const membersLoading = ref(false)
+const membershipStatus = ref(null)
+const checkingMembership = ref(true)
+const applyingJoin = ref(false)
+const quitting = ref(false)
+const isClubAdmin = ref(false)
 
 const formatDate = (date) => dayjs(date).format('YYYY-MM-DD HH:mm')
 
@@ -92,6 +108,61 @@ const fetchMembers = async () => {
     members.value = res.data.records
   } finally {
     membersLoading.value = false
+  }
+}
+
+const checkMembershipStatus = async () => {
+  checkingMembership.value = true
+  try {
+    const res = await api.get(`/api/memberships/my`, { params: { page: 1, size: 100 } })
+    const membership = res.data.records.find(m => m.clubId === Number(route.params.id))
+    if (membership) {
+      if (membership.status === 0) {
+        membershipStatus.value = 'pending'
+      } else if (membership.status === 1) {
+        membershipStatus.value = 'member'
+      }
+    }
+  } finally {
+    checkingMembership.value = false
+  }
+}
+
+const checkAdminPermission = async () => {
+  try {
+    const res = await api.get(`/api/memberships/check-admin/${route.params.id}`)
+    isClubAdmin.value = res.data
+  } catch {
+    isClubAdmin.value = false
+  }
+}
+
+const handleApplyJoin = async () => {
+  applyingJoin.value = true
+  try {
+    await api.post(`/api/memberships/apply/${route.params.id}`)
+    ElMessage.success('申请已提交，请等待审核')
+    membershipStatus.value = 'pending'
+  } catch (e) {
+    ElMessage.error(e.response?.data?.message || '申请失败')
+  } finally {
+    applyingJoin.value = false
+  }
+}
+
+const handleQuit = async () => {
+  await ElMessageBox.confirm('确定要退出该社团吗？', '提示', { type: 'warning' })
+  quitting.value = true
+  try {
+    await api.post(`/api/memberships/quit/${route.params.id}`)
+    ElMessage.success('已退出社团')
+    membershipStatus.value = null
+    fetchMembers()
+    fetchClub()
+  } catch (e) {
+    ElMessage.error(e.response?.data?.message || '退出失败')
+  } finally {
+    quitting.value = false
   }
 }
 
@@ -113,5 +184,15 @@ const handleRemove = async (id) => {
 onMounted(() => {
   fetchClub()
   fetchMembers()
+  checkMembershipStatus()
+  checkAdminPermission()
 })
 </script>
+
+<style scoped>
+.detail-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+</style>

@@ -1,13 +1,22 @@
 <template>
   <div class="dashboard">
     <div class="stat-cards">
-      <div class="stat-card">
+      <div v-if="isAdmin" class="stat-card">
         <div class="stat-icon blue">
           <el-icon><User /></el-icon>
         </div>
         <div class="stat-info">
           <div class="stat-value">{{ stats.totalUsers || 0 }}</div>
           <div class="stat-label">用户总数</div>
+        </div>
+      </div>
+      <div v-if="!isAdmin" class="stat-card">
+        <div class="stat-icon blue">
+          <el-icon><Tickets /></el-icon>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value">{{ stats.myClubCount || 0 }}</div>
+          <div class="stat-label">我的社团</div>
         </div>
       </div>
       <div class="stat-card">
@@ -34,7 +43,7 @@
         </div>
         <div class="stat-info">
           <div class="stat-value">{{ stats.pendingApplications || 0 }}</div>
-          <div class="stat-label">待审核申请</div>
+          <div class="stat-label">{{ isAdmin ? '待审核申请' : '我管理的待审核' }}</div>
         </div>
       </div>
     </div>
@@ -98,9 +107,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useUserStore } from '../stores/user'
 import api from '../api'
 import dayjs from 'dayjs'
+
+const userStore = useUserStore()
+const isAdmin = computed(() => userStore.user?.role === 'ADMIN')
 
 const stats = ref({})
 const announcements = ref([])

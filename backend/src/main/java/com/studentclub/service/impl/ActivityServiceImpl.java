@@ -11,10 +11,13 @@ import com.studentclub.entity.Registration;
 import com.studentclub.mapper.ActivityMapper;
 import com.studentclub.mapper.RegistrationMapper;
 import com.studentclub.service.ActivityService;
+import com.studentclub.service.MembershipService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
+import java.util.List;
 import java.time.LocalDateTime;
 
 /**
@@ -25,6 +28,7 @@ import java.time.LocalDateTime;
 public class ActivityServiceImpl extends ServiceImpl<ActivityMapper, Activity> implements ActivityService {
     
     private final RegistrationMapper registrationMapper;
+    private final MembershipService membershipService;
     
     @Override
     public void createActivity(ActivityDTO dto) {
@@ -79,8 +83,16 @@ public class ActivityServiceImpl extends ServiceImpl<ActivityMapper, Activity> i
     }
     
     @Override
-    public PageResult<Activity> pageActivities(Integer page, Integer size, Long clubId, String keyword) {
+    public PageResult<Activity> pageActivities(Integer page, Integer size, Long clubId, String keyword, Boolean managedOnly, Long userId) {
         Page<Activity> pageParam = new Page<>(page, size);
+        if (Boolean.TRUE.equals(managedOnly) && userId != null) {
+            List<Long> managedClubIds = membershipService.getManagedClubIds(userId);
+            if (managedClubIds.isEmpty()) {
+                return PageResult.of(Collections.emptyList(), 0L, (long) page, (long) size);
+            }
+            IPage<Activity> result = baseMapper.selectActivityPageByClubIds(pageParam, managedClubIds, keyword);
+            return PageResult.of(result.getRecords(), result.getTotal(), result.getCurrent(), result.getSize());
+        }
         IPage<Activity> result = baseMapper.selectActivityPage(pageParam, clubId, keyword);
         return PageResult.of(result.getRecords(), result.getTotal(), result.getCurrent(), result.getSize());
     }
@@ -159,5 +171,12 @@ public class ActivityServiceImpl extends ServiceImpl<ActivityMapper, Activity> i
         }
         activity.setStatus(status);
         updateById(activity);
+    }
+    
+    @Override
+    public PageResult<Registration> getActivityRegistrations(Long activityId, Integer page, Integer size) {
+        Page<Registration> pageParam = new Page<>(page, size);
+        IPage<Registration> result = registrationMapper.selectByActivity(pageParam, activityId);
+        return PageResult.of(result.getRecords(), result.getTotal(), result.getCurrent(), result.getSize());
     }
 }

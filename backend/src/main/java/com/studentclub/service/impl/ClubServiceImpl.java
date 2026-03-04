@@ -13,13 +13,16 @@ import com.studentclub.mapper.ClubMapper;
 import com.studentclub.mapper.MembershipMapper;
 import com.studentclub.mapper.UserMapper;
 import com.studentclub.service.ClubService;
+import com.studentclub.service.MembershipService;
+
+import java.util.Collections;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * 社团服务实现
@@ -29,6 +32,7 @@ import java.util.List;
 public class ClubServiceImpl extends ServiceImpl<ClubMapper, Club> implements ClubService {
     
     private final MembershipMapper membershipMapper;
+    private final MembershipService membershipService;
     private final UserMapper userMapper;
     
     @Override
@@ -98,8 +102,19 @@ public class ClubServiceImpl extends ServiceImpl<ClubMapper, Club> implements Cl
     }
     
     @Override
-    public PageResult<Club> pageClubs(Integer page, Integer size, String keyword, Integer status) {
+    public PageResult<Club> pageClubs(Integer page, Integer size, String keyword, Integer status, String scope, Long userId, String userRole) {
         Page<Club> pageParam = new Page<>(page, size);
+        // 非管理员且指定了 scope 时，按范围筛选
+        if (userId != null && !"ADMIN".equals(userRole) && scope != null && !scope.isEmpty() && !"all".equals(scope)) {
+            List<Long> clubIds = "managed".equals(scope)
+                    ? membershipService.getManagedClubIds(userId)
+                    : membershipService.getJoinedClubIds(userId);
+            if (clubIds.isEmpty()) {
+                return PageResult.of(Collections.emptyList(), 0L, (long) page, (long) size);
+            }
+            IPage<Club> result = baseMapper.selectClubPageByClubIds(pageParam, clubIds, keyword, status);
+            return PageResult.of(result.getRecords(), result.getTotal(), result.getCurrent(), result.getSize());
+        }
         IPage<Club> result = baseMapper.selectClubPage(pageParam, keyword, status);
         return PageResult.of(result.getRecords(), result.getTotal(), result.getCurrent(), result.getSize());
     }
@@ -126,9 +141,13 @@ public class ClubServiceImpl extends ServiceImpl<ClubMapper, Club> implements Cl
             return list(new LambdaQueryWrapper<Club>()
                     .eq(Club::getStatus, 1));
         }
-        // 普通用户只能看到自己是负责人的社团
+        // 普通用户只能看到自己拥有管理权限的社团（LEADER 或 ADMIN 角色）
+        List<Long> managedClubIds = membershipService.getManagedClubIds(userId);
+        if (managedClubIds.isEmpty()) {
+            return List.of();
+        }
         return list(new LambdaQueryWrapper<Club>()
-                .eq(Club::getLeaderId, userId)
+                .in(Club::getId, managedClubIds)
                 .eq(Club::getStatus, 1));
     }
 }

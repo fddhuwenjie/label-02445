@@ -4,7 +4,7 @@ import com.studentclub.common.PageResult;
 import com.studentclub.common.Result;
 import com.studentclub.entity.User;
 import com.studentclub.service.UserService;
-import jakarta.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

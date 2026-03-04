@@ -5,8 +5,9 @@ import com.studentclub.common.Result;
 import com.studentclub.dto.ClubDTO;
 import com.studentclub.entity.Club;
 import com.studentclub.service.ClubService;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
+import com.studentclub.service.MembershipService;
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,6 +22,7 @@ import java.util.List;
 public class ClubController {
     
     private final ClubService clubService;
+    private final MembershipService membershipService;
     
     @PostMapping
     public Result<Void> createClub(@Valid @RequestBody ClubDTO dto, HttpServletRequest request) {
@@ -30,13 +32,20 @@ public class ClubController {
     }
     
     @PutMapping
-    public Result<Void> updateClub(@Valid @RequestBody ClubDTO dto) {
+    public Result<Void> updateClub(@Valid @RequestBody ClubDTO dto, HttpServletRequest request) {
+        Long userId = (Long) request.getAttribute("userId");
+        String role = (String) request.getAttribute("role");
+        checkClubAdmin(dto.getId(), userId, role);
         clubService.updateClub(dto);
         return Result.success();
     }
     
     @DeleteMapping("/{id}")
-    public Result<Void> deleteClub(@PathVariable Long id) {
+    public Result<Void> deleteClub(@PathVariable Long id, HttpServletRequest request) {
+        String role = (String) request.getAttribute("role");
+        if (!"ADMIN".equals(role)) {
+            throw new RuntimeException("只有管理员可以删除社团");
+        }
         clubService.deleteClub(id);
         return Result.success();
     }
@@ -51,12 +60,20 @@ public class ClubController {
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer size,
             @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) Integer status) {
-        return Result.success(clubService.pageClubs(page, size, keyword, status));
+            @RequestParam(required = false) Integer status,
+            @RequestParam(required = false) String scope,
+            HttpServletRequest request) {
+        Long userId = (Long) request.getAttribute("userId");
+        String role = (String) request.getAttribute("role");
+        return Result.success(clubService.pageClubs(page, size, keyword, status, scope, userId, role));
     }
     
     @PutMapping("/{id}/audit")
-    public Result<Void> auditClub(@PathVariable Long id, @RequestParam Integer status) {
+    public Result<Void> auditClub(@PathVariable Long id, @RequestParam Integer status, HttpServletRequest request) {
+        String role = (String) request.getAttribute("role");
+        if (!"ADMIN".equals(role)) {
+            throw new RuntimeException("只有管理员可以审核社团");
+        }
         clubService.auditClub(id, status);
         return Result.success();
     }
@@ -71,5 +88,14 @@ public class ClubController {
         Long userId = (Long) request.getAttribute("userId");
         String role = (String) request.getAttribute("role");
         return Result.success(clubService.getMyClubs(userId, role));
+    }
+    
+    private void checkClubAdmin(Long clubId, Long userId, String role) {
+        if ("ADMIN".equals(role)) {
+            return;
+        }
+        if (!membershipService.isClubAdmin(clubId, userId)) {
+            throw new RuntimeException("无权限操作该社团");
+        }
     }
 }

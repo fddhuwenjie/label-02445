@@ -4,7 +4,7 @@ import com.studentclub.common.PageResult;
 import com.studentclub.common.Result;
 import com.studentclub.entity.Membership;
 import com.studentclub.service.MembershipService;
-import jakarta.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,7 +26,14 @@ public class MembershipController {
     }
     
     @PutMapping("/{id}/audit")
-    public Result<Void> auditApplication(@PathVariable Long id, @RequestParam Integer status) {
+    public Result<Void> auditApplication(@PathVariable Long id, @RequestParam Integer status, HttpServletRequest request) {
+        Long userId = (Long) request.getAttribute("userId");
+        String role = (String) request.getAttribute("role");
+        Membership membership = membershipService.getById(id);
+        if (membership == null) {
+            throw new RuntimeException("申请记录不存在");
+        }
+        checkClubAdmin(membership.getClubId(), userId, role);
         membershipService.auditApplication(id, status);
         return Result.success();
     }
@@ -39,19 +46,36 @@ public class MembershipController {
     }
     
     @DeleteMapping("/{id}")
-    public Result<Void> removeMember(@PathVariable Long id) {
+    public Result<Void> removeMember(@PathVariable Long id, HttpServletRequest request) {
+        Long userId = (Long) request.getAttribute("userId");
+        String role = (String) request.getAttribute("role");
+        Membership membership = membershipService.getById(id);
+        if (membership == null) {
+            throw new RuntimeException("成员记录不存在");
+        }
+        checkClubAdmin(membership.getClubId(), userId, role);
         membershipService.removeMember(id);
         return Result.success();
     }
     
     @PostMapping("/add")
-    public Result<Void> addMember(@RequestBody Membership membership) {
+    public Result<Void> addMember(@RequestBody Membership membership, HttpServletRequest request) {
+        Long userId = (Long) request.getAttribute("userId");
+        String role = (String) request.getAttribute("role");
+        checkClubAdmin(membership.getClubId(), userId, role);
         membershipService.addMember(membership);
         return Result.success("添加成功", null);
     }
     
     @PutMapping("/{id}/role")
-    public Result<Void> updateRole(@PathVariable Long id, @RequestParam String role) {
+    public Result<Void> updateRole(@PathVariable Long id, @RequestParam String role, HttpServletRequest request) {
+        Long userId = (Long) request.getAttribute("userId");
+        String userRole = (String) request.getAttribute("role");
+        Membership membership = membershipService.getById(id);
+        if (membership == null) {
+            throw new RuntimeException("成员记录不存在");
+        }
+        checkClubAdmin(membership.getClubId(), userId, userRole);
         membershipService.updateRole(id, role);
         return Result.success();
     }
@@ -79,5 +103,24 @@ public class MembershipController {
     public Result<Boolean> checkMembership(@PathVariable Long clubId, HttpServletRequest request) {
         Long userId = (Long) request.getAttribute("userId");
         return Result.success(membershipService.isMember(clubId, userId));
+    }
+    
+    @GetMapping("/check-admin/{clubId}")
+    public Result<Boolean> checkClubAdminPermission(@PathVariable Long clubId, HttpServletRequest request) {
+        Long userId = (Long) request.getAttribute("userId");
+        String role = (String) request.getAttribute("role");
+        if ("ADMIN".equals(role)) {
+            return Result.success(true);
+        }
+        return Result.success(membershipService.isClubAdmin(clubId, userId));
+    }
+    
+    private void checkClubAdmin(Long clubId, Long userId, String role) {
+        if ("ADMIN".equals(role)) {
+            return;
+        }
+        if (!membershipService.isClubAdmin(clubId, userId)) {
+            throw new RuntimeException("无权限操作");
+        }
     }
 }
