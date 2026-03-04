@@ -83,13 +83,13 @@ docker compose down
 
 > 若提示 `command not found: docker-compose`，请使用 `docker compose`（空格，Docker 20.10+ 内置）。
 
-### 3.2 服务端口
+### 3.2 服务端口（Docker 宿主机映射）
 
-| 服务 | 端口 | 说明 |
-|------|------|------|
-| MySQL | 3306 | 数据库 |
-| Backend | 8084 | 后端API |
-| Frontend-Admin | 8085 | 管理后台 |
+| 服务 | 宿主机端口 | 容器内端口 | 说明 |
+|------|------------|------------|------|
+| MySQL | 3306 | 3306 | 数据库 |
+| Backend | 8084 | 8080 | 后端API |
+| Frontend-Admin | 8085 | 80 | 管理后台（Nginx） |
 
 ### 3.3 访问地址
 
@@ -170,8 +170,13 @@ mvn clean package -DskipTests
 ### 6.2 端口被占用
 
 ```bash
-# 查看端口占用
+# 本地开发：后端 8080、前端 5173
 lsof -i :8080
+lsof -i :5173
+
+# Docker 部署：后端 8084、前端 8085
+lsof -i :8084
+lsof -i :8085
 
 # 杀死进程
 kill -9 <PID>

@@ -39,16 +39,31 @@ docker compose down
 
 ## Services
 
+### Docker 部署端口（docker compose up 后）
+
 | 服务 | 端口 | 说明 |
 |------|------|------|
-| backend | 8084 | 后端 API 服务 |
-| frontend-admin | 8085 | 管理后台前端 |
+| backend | 8084 | 后端 API 服务（容器内 8080） |
+| frontend-admin | 8085 | 管理后台前端（容器内 80） |
+| mysql | 3306 | MySQL 数据库 |
+
+### 本地开发端口（mvn spring-boot:run + npm run dev）
+
+| 服务 | 端口 | 说明 |
+|------|------|------|
+| backend | 8080 | 后端 API 服务 |
+| frontend-admin | 5173 | 管理后台前端（Vite 开发服务器） |
 | mysql | 3306 | MySQL 数据库 |
 
 ## 访问地址
 
+**Docker 部署：**
 - 管理后台：http://localhost:8085
 - 后端API：http://localhost:8084/api
+
+**本地开发：**
+- 管理后台：http://localhost:5173
+- 后端API：http://localhost:8080/api
 
 ## 测试账号
 

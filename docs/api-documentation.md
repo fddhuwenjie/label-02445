@@ -2,7 +2,8 @@
 
 ## 基础信息
 
-- 基础URL: `http://localhost:8084/api`
+- 基础URL（本地开发）: `http://localhost:8080/api`
+- 基础URL（Docker 部署）: `http://localhost:8084/api`
 - 认证方式: JWT Token
 - 请求头: `Authorization: Bearer <token>`
 
