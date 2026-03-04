@@ -68,18 +68,20 @@ npm run dev
 ### 3.1 一键启动
 
 ```bash
-# 构建并启动所有服务
-docker-compose up --build -d
+# 构建并启动所有服务（使用 docker compose，Docker 内置）
+docker compose up --build -d
 
 # 查看服务状态
-docker-compose ps
+docker compose ps
 
 # 查看日志
-docker-compose logs -f
+docker compose logs -f
 
 # 停止服务
-docker-compose down
+docker compose down
 ```
+
+> 若提示 `command not found: docker-compose`，请使用 `docker compose`（空格，Docker 20.10+ 内置）。
 
 ### 3.2 服务端口
 
@@ -182,7 +184,7 @@ kill -9 <PID>
 docker system prune -a
 
 # 重新构建
-docker-compose build --no-cache
+docker compose build --no-cache
 ```
 
 ### 6.4 前端 npm install 失败
@@ -197,7 +199,7 @@ docker-compose build --no-cache
 
 2. **增加 Docker 内存**：Docker Desktop → Settings → Resources，将 Memory 调至 4GB 以上。
 
-3. **清理后重试**：`docker-compose build --no-cache frontend-admin`
+3. **清理后重试**：`docker compose build --no-cache frontend-admin`
 
 ---
 

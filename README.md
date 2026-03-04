@@ -5,18 +5,20 @@
 ### 使用 Docker Compose 运行（推荐）
 
 ```bash
-# 克隆项目后，在根目录执行
-docker-compose up --build -d
+# 克隆项目后，在根目录执行（Docker Compose V2，随 Docker 安装）
+docker compose up --build -d
 
 # 查看运行状态
-docker-compose ps
+docker compose ps
 
 # 查看日志
-docker-compose logs -f
+docker compose logs -f
 
 # 停止服务
-docker-compose down
+docker compose down
 ```
+
+> 若提示 `command not found`，可尝试 `docker-compose`（需单独安装）或升级 Docker Desktop。
 
 ### 手动运行
 
