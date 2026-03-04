@@ -48,6 +48,8 @@ services:
     build:
       context: ./frontend-admin
       dockerfile: Dockerfile
+      args:
+        NPM_REGISTRY: https://registry.npmmirror.com
     container_name: club-frontend-admin
     restart: always
     ports:

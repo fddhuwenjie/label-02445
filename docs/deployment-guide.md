@@ -175,15 +175,29 @@ lsof -i :8080
 kill -9 <PID>
 ```
 
-### 6.3 Docker构建失败
+### 6.3 Docker 构建失败
 
 ```bash
-# 清理Docker缓存
+# 清理 Docker 缓存
 docker system prune -a
 
 # 重新构建
 docker-compose build --no-cache
 ```
+
+### 6.4 前端 npm install 失败
+
+项目已默认使用 npmmirror 源，国内外均可访问。若仍失败：
+
+1. **改用官方源**（如 npmmirror 不可用）：在 `docker-compose.yml` 中修改：
+   ```yaml
+   args:
+     NPM_REGISTRY: https://registry.npmjs.org/
+   ```
+
+2. **增加 Docker 内存**：Docker Desktop → Settings → Resources，将 Memory 调至 4GB 以上。
+
+3. **清理后重试**：`docker-compose build --no-cache frontend-admin`
 
 ---
 
