@@ -85,7 +85,14 @@ public class MembershipController {
             @PathVariable Long clubId,
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer size,
-            @RequestParam(required = false) Integer status) {
+            @RequestParam(required = false) Integer status,
+            HttpServletRequest request) {
+        Long userId = (Long) request.getAttribute("userId");
+        String role = (String) request.getAttribute("role");
+        // 只有社团成员、社团管理员或系统管理员可以查看成员列表
+        if (!"ADMIN".equals(role) && !membershipService.isMember(clubId, userId) && !membershipService.isClubAdmin(clubId, userId)) {
+            throw new RuntimeException("无权查看该社团成员列表");
+        }
         return Result.success(membershipService.getClubMembers(clubId, page, size, status));
     }
     

@@ -65,6 +65,11 @@ public class MembershipServiceImpl extends ServiceImpl<MembershipMapper, Members
             throw new RuntimeException("申请记录不存在");
         }
         
+        // 防止重复审核
+        if (membership.getStatus() != 0) {
+            throw new RuntimeException("该申请已被处理，不能重复操作");
+        }
+        
         membership.setStatus(status);
         if (status == 1) {
             membership.setJoinedAt(LocalDateTime.now());
@@ -126,6 +131,14 @@ public class MembershipServiceImpl extends ServiceImpl<MembershipMapper, Members
     @Override
     @Transactional
     public void addMember(Membership membership) {
+        // 白名单校验角色
+        String role = membership.getRole();
+        if (role == null || role.isBlank()) {
+            membership.setRole("MEMBER");
+        } else if (!"MEMBER".equals(role) && !"ADMIN".equals(role)) {
+            throw new RuntimeException("添加成员时角色只能为 MEMBER 或 ADMIN");
+        }
+        
         // 检查是否已是成员
         Membership existing = getOne(new LambdaQueryWrapper<Membership>()
                 .eq(Membership::getClubId, membership.getClubId())
@@ -148,6 +161,11 @@ public class MembershipServiceImpl extends ServiceImpl<MembershipMapper, Members
     
     @Override
     public void updateRole(Long id, String role) {
+        // 白名单校验角色
+        if (!"MEMBER".equals(role) && !"ADMIN".equals(role) && !"LEADER".equals(role)) {
+            throw new RuntimeException("非法角色值");
+        }
+        
         Membership membership = getById(id);
         if (membership == null) {
             throw new RuntimeException("成员记录不存在");
@@ -155,6 +173,24 @@ public class MembershipServiceImpl extends ServiceImpl<MembershipMapper, Members
         
         if ("LEADER".equals(membership.getRole())) {
             throw new RuntimeException("不能修改社团负责人角色");
+        }
+        
+        // 设置为 LEADER 时，需要先将原 LEADER 降级为 MEMBER
+        if ("LEADER".equals(role)) {
+            Membership currentLeader = getOne(new LambdaQueryWrapper<Membership>()
+                    .eq(Membership::getClubId, membership.getClubId())
+                    .eq(Membership::getRole, "LEADER")
+                    .eq(Membership::getStatus, 1));
+            if (currentLeader != null) {
+                currentLeader.setRole("MEMBER");
+                updateById(currentLeader);
+            }
+            // 同步更新社团的 leader_id
+            Club club = clubMapper.selectById(membership.getClubId());
+            if (club != null) {
+                club.setLeaderId(membership.getUserId());
+                clubMapper.updateById(club);
+            }
         }
         
         membership.setRole(role);

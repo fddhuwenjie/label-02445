@@ -8,10 +8,8 @@ import com.studentclub.common.PageResult;
 import com.studentclub.dto.ClubDTO;
 import com.studentclub.entity.Club;
 import com.studentclub.entity.Membership;
-import com.studentclub.entity.User;
 import com.studentclub.mapper.ClubMapper;
 import com.studentclub.mapper.MembershipMapper;
-import com.studentclub.mapper.UserMapper;
 import com.studentclub.service.ClubService;
 import com.studentclub.service.MembershipService;
 
@@ -33,7 +31,6 @@ public class ClubServiceImpl extends ServiceImpl<ClubMapper, Club> implements Cl
     
     private final MembershipMapper membershipMapper;
     private final MembershipService membershipService;
-    private final UserMapper userMapper;
     
     @Override
     @Transactional
@@ -63,13 +60,6 @@ public class ClubServiceImpl extends ServiceImpl<ClubMapper, Club> implements Cl
         membership.setStatus(1);
         membership.setJoinedAt(LocalDateTime.now());
         membershipMapper.insert(membership);
-        
-        // 更新用户角色为LEADER
-        User user = userMapper.selectById(userId);
-        if ("STUDENT".equals(user.getRole())) {
-            user.setRole("LEADER");
-            userMapper.updateById(user);
-        }
     }
     
     @Override
@@ -104,8 +94,12 @@ public class ClubServiceImpl extends ServiceImpl<ClubMapper, Club> implements Cl
     @Override
     public PageResult<Club> pageClubs(Integer page, Integer size, String keyword, Integer status, String scope, Long userId, String userRole) {
         Page<Club> pageParam = new Page<>(page, size);
-        // 非管理员且指定了 scope 时，按范围筛选
-        if (userId != null && !"ADMIN".equals(userRole) && scope != null && !scope.isEmpty() && !"all".equals(scope)) {
+        // 非管理员强制只能看到已审核的社团
+        if (!"ADMIN".equals(userRole)) {
+            status = 1;
+        }
+        // 指定了 scope 时，按范围筛选
+        if (userId != null && scope != null && !scope.isEmpty() && !"all".equals(scope)) {
             List<Long> clubIds = "managed".equals(scope)
                     ? membershipService.getManagedClubIds(userId)
                     : membershipService.getJoinedClubIds(userId);

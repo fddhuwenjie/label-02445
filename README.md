@@ -22,7 +22,7 @@ docker compose down
 
 ### 手动运行
 
-1. 确保已安装 JDK 21、Maven、Node.js 18+、MySQL 8.0
+1. 确保已安装 JDK 25、Maven、Node.js 18+、MySQL 8.0
 2. 创建数据库（系统会自动创建表结构）
 3. 修改 `backend/src/main/resources/application.yml` 中的数据库配置
 4. 运行后端：
@@ -70,10 +70,10 @@ docker compose down
 | 角色 | 用户名 | 密码 |
 |------|--------|------|
 | 管理员 | admin | admin123 |
-| 社团负责人 | leader | leader123 |
+| 学生（社团负责人） | leader | leader123 |
 | 学生 | student | student123 |
 
-注：系统启动时会自动初始化这些测试账号，确保密码正确。
+注：系统只有两种用户角色：管理员（ADMIN）和学生（STUDENT）。学生创建社团后自动成为该社团的负责人，对自己管理的社团拥有额外管理权限。
 
 ## 题目内容
 
@@ -87,8 +87,7 @@ docker compose down
 
 **用户角色：**
 - 系统管理员：管理整个系统，审核社团，管理用户
-- 社团负责人：管理社团信息，审核成员申请，发布活动
-- 普通学生：浏览社团，申请加入，参与活动
+- 学生：浏览社团，申请加入，参与活动；创建社团后自动成为该社团负责人，可管理社团信息、审核成员申请、发布活动
 
 **功能需求：**
 - 用户管理：注册、登录、个人信息管理
@@ -198,6 +197,7 @@ docker compose down
 - 前端：Vue 3 + Element Plus
 - 开发工具：IntelliJ IDEA
 - 服务器：Tomcat 9.x（Spring Boot 2.7 内嵌）
+- JDK：OpenJDK 25
 
 ---
 
@@ -236,12 +236,12 @@ docker compose down
 
 ## 技术栈
 
-- **后端**: Java 21, Spring Boot 2.7.18, MyBatis Plus, MySQL 8.0
+- **后端**: Java 25, Spring Boot 2.7.18, MyBatis Plus, MySQL 8.0
 - **前端**: Vue 3, Vite, Element Plus, Axios
 - **容器化**: Docker, Docker Compose
 - **其他**: JWT 认证, RESTful API
 
-> **版本说明**：课题 Prompt 要求 OpenJDK 25，当前实现采用 Java 21 + Spring Boot 2.7.18，以兼容 Docker 构建及主流运行环境。Spring Boot 2.7 内嵌 Tomcat 9.x，使用 `javax.servlet.*`。
+> **版本说明**：项目使用 Java 25 + Spring Boot 2.7.18。Spring Boot 2.7 内嵌 Tomcat 9.x，使用 `javax.servlet.*`。
 
 ## 项目结构
 

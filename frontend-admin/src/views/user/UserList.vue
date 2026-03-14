@@ -10,7 +10,6 @@
         <el-input v-model="keyword" placeholder="搜索用户名/姓名/学号" style="width: 250px" clearable @keyup.enter="fetchData" />
         <el-select v-model="role" placeholder="角色" style="width: 120px" clearable @change="fetchData">
           <el-option label="管理员" value="ADMIN" />
-          <el-option label="社团负责人" value="LEADER" />
           <el-option label="学生" value="STUDENT" />
         </el-select>
         <el-select v-model="status" placeholder="状态" style="width: 120px" clearable @change="fetchData">
@@ -28,8 +27,8 @@
         <el-table-column prop="phone" label="手机号" />
         <el-table-column prop="role" label="角色">
           <template #default="{ row }">
-            <el-tag :type="row.role === 'ADMIN' ? 'danger' : row.role === 'LEADER' ? 'warning' : ''">
-              {{ row.role === 'ADMIN' ? '管理员' : row.role === 'LEADER' ? '社团负责人' : '学生' }}
+            <el-tag :type="row.role === 'ADMIN' ? 'danger' : ''">
+              {{ row.role === 'ADMIN' ? '管理员' : '学生' }}
             </el-tag>
           </template>
         </el-table-column>
@@ -88,7 +87,6 @@
         <el-form-item label="角色" prop="role">
           <el-select v-model="addForm.role" placeholder="请选择角色" style="width: 100%">
             <el-option label="学生" value="STUDENT" />
-            <el-option label="社团负责人" value="LEADER" />
             <el-option label="管理员" value="ADMIN" />
           </el-select>
         </el-form-item>
@@ -120,7 +118,6 @@
         <el-form-item label="角色" prop="role">
           <el-select v-model="editForm.role" placeholder="请选择角色" style="width: 100%">
             <el-option label="学生" value="STUDENT" />
-            <el-option label="社团负责人" value="LEADER" />
             <el-option label="管理员" value="ADMIN" />
           </el-select>
         </el-form-item>
@@ -141,8 +138,8 @@
         <el-descriptions-item label="姓名">{{ viewData.realName }}</el-descriptions-item>
         <el-descriptions-item label="学号">{{ viewData.studentId }}</el-descriptions-item>
         <el-descriptions-item label="角色">
-          <el-tag :type="viewData.role === 'ADMIN' ? 'danger' : viewData.role === 'LEADER' ? 'warning' : ''">
-            {{ viewData.role === 'ADMIN' ? '管理员' : viewData.role === 'LEADER' ? '社团负责人' : '学生' }}
+          <el-tag :type="viewData.role === 'ADMIN' ? 'danger' : ''">
+            {{ viewData.role === 'ADMIN' ? '管理员' : '学生' }}
           </el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="邮箱">{{ viewData.email || '-' }}</el-descriptions-item>

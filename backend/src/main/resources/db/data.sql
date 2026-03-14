@@ -9,7 +9,7 @@ INSERT IGNORE INTO t_user (id, username, password, real_name, student_id, email,
 -- 插入社团负责人账号 (密码: leader123)
 -- BCrypt hash for 'leader123': $2a$10$EqKcp1WFKVQISheBxkVJaeNzSIb.Z8YPHlJXhNFyuG8JzHEuWNe9O
 INSERT IGNORE INTO t_user (id, username, password, real_name, student_id, email, role, status) VALUES
-(2, 'leader', '$2a$10$EqKcp1WFKVQISheBxkVJaeNzSIb.Z8YPHlJXhNFyuG8JzHEuWNe9O', '张三', '2021001001', 'leader@school.edu', 'LEADER', 1);
+(2, 'leader', '$2a$10$EqKcp1WFKVQISheBxkVJaeNzSIb.Z8YPHlJXhNFyuG8JzHEuWNe9O', '张三', '2021001001', 'leader@school.edu', 'STUDENT', 1);
 
 -- 插入学生账号 (密码: student123)
 -- BCrypt hash for 'student123': $2a$10$EqKcp1WFKVQISheBxkVJaeNzSIb.Z8YPHlJXhNFyuG8JzHEuWNe9O

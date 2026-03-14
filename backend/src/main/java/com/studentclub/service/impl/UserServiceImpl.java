@@ -103,6 +103,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     
     @Override
     public void changePassword(Long userId, String oldPassword, String newPassword) {
+        if (oldPassword == null || oldPassword.isBlank()) {
+            throw new RuntimeException("原密码不能为空");
+        }
+        if (newPassword == null || newPassword.isBlank()) {
+            throw new RuntimeException("新密码不能为空");
+        }
+        if (newPassword.length() < 6) {
+            throw new RuntimeException("新密码长度不能少于6位");
+        }
+        
         User user = getById(userId);
         if (user == null) {
             throw new RuntimeException("用户不存在");

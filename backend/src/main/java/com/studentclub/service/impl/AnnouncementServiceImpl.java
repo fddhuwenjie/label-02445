@@ -23,7 +23,14 @@ public class AnnouncementServiceImpl extends ServiceImpl<AnnouncementMapper, Ann
     
     @Override
     public void updateAnnouncement(Announcement announcement) {
-        updateById(announcement);
+        Announcement existing = getById(announcement.getId());
+        if (existing == null) {
+            throw new RuntimeException("公告不存在");
+        }
+        // 锁定 clubId 和 publisherId，不允许通过更新修改
+        existing.setTitle(announcement.getTitle());
+        existing.setContent(announcement.getContent());
+        updateById(existing);
     }
     
     @Override

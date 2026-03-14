@@ -11,7 +11,7 @@
 ## 1. 环境要求
 
 ### 1.1 开发环境
-- JDK 21+
+- JDK 25+
 - Maven 3.9+
 - Node.js 18+
 - MySQL 8.0+
@@ -109,7 +109,7 @@ docker compose down
 ### 4.2 配置JDK
 
 1. `File -> Project Structure -> Project`
-2. 设置Project SDK为JDK 21
+2. 设置Project SDK为JDK 25
 
 ### 4.3 运行后端
 
