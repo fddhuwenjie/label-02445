@@ -26,8 +26,8 @@
         <el-table-column prop="userStudentId" label="学号" />
         <el-table-column prop="role" label="角色">
           <template #default="{ row }">
-            <el-tag :type="row.role === 'LEADER' ? 'danger' : row.role === 'ADMIN' ? 'warning' : ''">
-              {{ row.role === 'LEADER' ? '负责人' : row.role === 'ADMIN' ? '管理员' : '成员' }}
+            <el-tag :type="row.role === 'ADMIN' ? 'danger' : ''">
+              {{ row.role === 'ADMIN' ? '管理员' : '成员' }}
             </el-tag>
           </template>
         </el-table-column>
@@ -44,7 +44,7 @@
             <el-button type="primary" size="small" link @click="handleView(row)">查看</el-button>
             <el-button v-if="row.status === 0" type="success" size="small" @click="handleAudit(row.id, 1)">通过</el-button>
             <el-button v-if="row.status === 0" type="danger" size="small" @click="handleAudit(row.id, 2)">拒绝</el-button>
-            <el-button v-if="row.status === 1 && row.role !== 'LEADER'" type="danger" size="small" @click="handleRemove(row.id)">移除</el-button>
+            <el-button v-if="row.status === 1 && row.role !== 'ADMIN'" type="danger" size="small" @click="handleRemove(row.id)">移除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -84,8 +84,8 @@
         <el-descriptions-item label="姓名">{{ viewData.userRealName }}</el-descriptions-item>
         <el-descriptions-item label="学号">{{ viewData.userStudentId }}</el-descriptions-item>
         <el-descriptions-item label="角色">
-          <el-tag :type="viewData.role === 'LEADER' ? 'danger' : viewData.role === 'ADMIN' ? 'warning' : ''">
-            {{ viewData.role === 'LEADER' ? '负责人' : viewData.role === 'ADMIN' ? '管理员' : '成员' }}
+          <el-tag :type="viewData.role === 'ADMIN' ? 'danger' : ''">
+            {{ viewData.role === 'ADMIN' ? '管理员' : '成员' }}
           </el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="状态">

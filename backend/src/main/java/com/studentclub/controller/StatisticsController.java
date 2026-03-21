@@ -56,7 +56,7 @@ public class StatisticsController {
                     .eq(Membership::getStatus, 1));
             List<Long> myClubIds = myMemberships.stream().map(Membership::getClubId).collect(Collectors.toList());
             List<Long> managedClubIds = myMemberships.stream()
-                    .filter(m -> "LEADER".equals(m.getRole()) || "ADMIN".equals(m.getRole()))
+                    .filter(m -> "ADMIN".equals(m.getRole()))
                     .map(Membership::getClubId).collect(Collectors.toList());
             
             data.put("myClubCount", myMemberships.size());

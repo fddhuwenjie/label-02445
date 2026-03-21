@@ -7,8 +7,8 @@
             <div class="profile-avatar">{{ userStore.user?.realName?.charAt(0) || 'U' }}</div>
             <h3 class="profile-name">{{ userStore.user?.realName }}</h3>
             <p class="profile-username">{{ userStore.user?.username }}</p>
-            <el-tag class="profile-role" :type="userStore.user?.role === 'ADMIN' ? 'danger' : userStore.user?.role === 'LEADER' ? 'warning' : ''">
-              {{ userStore.user?.role === 'ADMIN' ? '管理员' : userStore.user?.role === 'LEADER' ? '社团负责人' : '学生' }}
+            <el-tag class="profile-role" :type="userStore.user?.role === 'ADMIN' ? 'danger' : ''">
+              {{ userStore.user?.role === 'ADMIN' ? '管理员' : '学生' }}
             </el-tag>
           </div>
         </div>
@@ -62,8 +62,8 @@
                 <el-table-column prop="clubName" label="社团名称" />
                 <el-table-column prop="role" label="角色">
                   <template #default="{ row }">
-                    <el-tag :type="row.role === 'LEADER' ? 'danger' : ''">
-                      {{ row.role === 'LEADER' ? '负责人' : '成员' }}
+                    <el-tag :type="row.role === 'ADMIN' ? 'danger' : ''">
+                      {{ row.role === 'ADMIN' ? '管理员' : '成员' }}
                     </el-tag>
                   </template>
                 </el-table-column>

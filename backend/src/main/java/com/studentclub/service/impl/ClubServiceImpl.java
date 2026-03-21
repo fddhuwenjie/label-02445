@@ -52,11 +52,11 @@ public class ClubServiceImpl extends ServiceImpl<ClubMapper, Club> implements Cl
         
         save(club);
         
-        // 创建者自动成为社团负责人
+        // 创建者自动成为社团管理员
         Membership membership = new Membership();
         membership.setUserId(userId);
         membership.setClubId(club.getId());
-        membership.setRole("LEADER");
+        membership.setRole("ADMIN");
         membership.setStatus(1);
         membership.setJoinedAt(LocalDateTime.now());
         membershipMapper.insert(membership);
@@ -135,7 +135,7 @@ public class ClubServiceImpl extends ServiceImpl<ClubMapper, Club> implements Cl
             return list(new LambdaQueryWrapper<Club>()
                     .eq(Club::getStatus, 1));
         }
-        // 普通用户只能看到自己拥有管理权限的社团（LEADER 或 ADMIN 角色）
+        // 普通用户只能看到自己拥有管理权限的社团（ADMIN 角色）
         List<Long> managedClubIds = membershipService.getManagedClubIds(userId);
         if (managedClubIds.isEmpty()) {
             return List.of();

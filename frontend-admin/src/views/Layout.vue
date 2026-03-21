@@ -101,7 +101,7 @@ const checkManagedClubs = async () => {
   }
   try {
     const res = await api.get('/api/memberships/my', { params: { page: 1, size: 100, status: 1 } })
-    hasManagedClubs.value = res.data.records.some(m => m.role === 'LEADER' || m.role === 'ADMIN')
+    hasManagedClubs.value = res.data.records.some(m => m.role === 'ADMIN')
   } catch {
     hasManagedClubs.value = false
   }

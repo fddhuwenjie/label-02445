@@ -131,7 +131,7 @@ const fetchMyManagedClubs = async () => {
   try {
     const res = await api.get('/api/memberships/my', { params: { page: 1, size: 100, status: 1 } })
     myManagedClubIds.value = res.data.records
-      .filter(m => m.role === 'LEADER' || m.role === 'ADMIN')
+      .filter(m => m.role === 'ADMIN')
       .map(m => m.clubId)
   } catch {
     myManagedClubIds.value = []

@@ -27,14 +27,14 @@ public class DataInitializer implements CommandLineRunner {
     private void initTestUsers() {
         // 初始化管理员账号
         initUser("admin", "admin123", "系统管理员", "ADMIN001", "ADMIN");
-        // 初始化社团负责人账号
-        initUser("leader", "leader123", "张三", "2021001001", "LEADER");
+        // 初始化学生账号（同时也是社团负责人）
+        initUser("leader", "leader123", "张三", "2021001001", "STUDENT");
         // 初始化学生账号
         initUser("student", "student123", "李四", "2021001002", "STUDENT");
         
         log.info("测试账号初始化完成");
         log.info("管理员: admin / admin123");
-        log.info("社团负责人: leader / leader123");
+        log.info("学生（社团负责人）: leader / leader123");
         log.info("学生: student / student123");
     }
     

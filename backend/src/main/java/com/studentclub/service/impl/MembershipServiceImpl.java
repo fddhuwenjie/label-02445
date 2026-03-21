@@ -94,8 +94,8 @@ public class MembershipServiceImpl extends ServiceImpl<MembershipMapper, Members
             throw new RuntimeException("您不是该社团成员");
         }
         
-        if ("LEADER".equals(membership.getRole())) {
-            throw new RuntimeException("社团负责人不能直接退出，请先转让负责人");
+        if ("ADMIN".equals(membership.getRole())) {
+            throw new RuntimeException("社团管理员不能直接退出，请先转让管理员");
         }
         
         membership.setStatus(3); // 已退出
@@ -115,8 +115,8 @@ public class MembershipServiceImpl extends ServiceImpl<MembershipMapper, Members
             throw new RuntimeException("成员记录不存在");
         }
         
-        if ("LEADER".equals(membership.getRole())) {
-            throw new RuntimeException("不能移除社团负责人");
+        if ("ADMIN".equals(membership.getRole())) {
+            throw new RuntimeException("不能移除社团管理员");
         }
         
         membership.setStatus(3);
@@ -161,9 +161,9 @@ public class MembershipServiceImpl extends ServiceImpl<MembershipMapper, Members
     
     @Override
     public void updateRole(Long id, String role) {
-        // 白名单校验角色
-        if (!"MEMBER".equals(role) && !"ADMIN".equals(role) && !"LEADER".equals(role)) {
-            throw new RuntimeException("非法角色值");
+        // 白名单校验角色：只允许 MEMBER 和 ADMIN
+        if (!"MEMBER".equals(role) && !"ADMIN".equals(role)) {
+            throw new RuntimeException("非法角色值，只允许 MEMBER 或 ADMIN");
         }
         
         Membership membership = getById(id);
@@ -171,19 +171,15 @@ public class MembershipServiceImpl extends ServiceImpl<MembershipMapper, Members
             throw new RuntimeException("成员记录不存在");
         }
         
-        if ("LEADER".equals(membership.getRole())) {
-            throw new RuntimeException("不能修改社团负责人角色");
-        }
-        
-        // 设置为 LEADER 时，需要先将原 LEADER 降级为 MEMBER
-        if ("LEADER".equals(role)) {
-            Membership currentLeader = getOne(new LambdaQueryWrapper<Membership>()
+        // 设置为 ADMIN 时，需要先将原 ADMIN 降级为 MEMBER（每个社团只有一个管理员）
+        if ("ADMIN".equals(role)) {
+            Membership currentAdmin = getOne(new LambdaQueryWrapper<Membership>()
                     .eq(Membership::getClubId, membership.getClubId())
-                    .eq(Membership::getRole, "LEADER")
+                    .eq(Membership::getRole, "ADMIN")
                     .eq(Membership::getStatus, 1));
-            if (currentLeader != null) {
-                currentLeader.setRole("MEMBER");
-                updateById(currentLeader);
+            if (currentAdmin != null) {
+                currentAdmin.setRole("MEMBER");
+                updateById(currentAdmin);
             }
             // 同步更新社团的 leader_id
             Club club = clubMapper.selectById(membership.getClubId());
@@ -225,7 +221,7 @@ public class MembershipServiceImpl extends ServiceImpl<MembershipMapper, Members
                 .eq(Membership::getClubId, clubId)
                 .eq(Membership::getUserId, userId)
                 .eq(Membership::getStatus, 1)
-                .in(Membership::getRole, "LEADER", "ADMIN")) > 0;
+                .in(Membership::getRole, "ADMIN")) > 0;
     }
     
     @Override
@@ -233,7 +229,7 @@ public class MembershipServiceImpl extends ServiceImpl<MembershipMapper, Members
         return list(new LambdaQueryWrapper<Membership>()
                 .eq(Membership::getUserId, userId)
                 .eq(Membership::getStatus, 1)
-                .in(Membership::getRole, "LEADER", "ADMIN"))
+                .in(Membership::getRole, "ADMIN"))
                 .stream()
                 .map(Membership::getClubId)
                 .distinct()

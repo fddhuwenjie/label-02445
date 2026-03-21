@@ -30,12 +30,12 @@ INSERT IGNORE INTO t_club (id, name, description, category, founder_id, leader_i
 
 -- 插入社团成员关系
 INSERT IGNORE INTO t_membership (user_id, club_id, role, status, joined_at) VALUES
-(2, 1, 'LEADER', 1, NOW()),
+(2, 1, 'ADMIN', 1, NOW()),
 (3, 1, 'MEMBER', 1, NOW()),
 (4, 1, 'MEMBER', 1, NOW()),
-(2, 2, 'LEADER', 1, NOW()),
+(2, 2, 'ADMIN', 1, NOW()),
 (5, 2, 'MEMBER', 1, NOW()),
-(3, 3, 'LEADER', 1, NOW());
+(3, 3, 'ADMIN', 1, NOW());
 
 -- 插入示例活动
 INSERT IGNORE INTO t_activity (id, club_id, title, description, location, start_time, end_time, max_participants, current_participants, status) VALUES

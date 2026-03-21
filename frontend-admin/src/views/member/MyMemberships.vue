@@ -19,8 +19,8 @@
         </el-table-column>
         <el-table-column prop="role" label="我的角色">
           <template #default="{ row }">
-            <el-tag :type="row.role === 'LEADER' ? 'danger' : row.role === 'ADMIN' ? 'warning' : ''">
-              {{ row.role === 'LEADER' ? '负责人' : row.role === 'ADMIN' ? '管理员' : '成员' }}
+            <el-tag :type="row.role === 'ADMIN' ? 'danger' : ''">
+              {{ row.role === 'ADMIN' ? '管理员' : '成员' }}
             </el-tag>
           </template>
         </el-table-column>
@@ -41,7 +41,7 @@
         </el-table-column>
         <el-table-column label="操作" width="150">
           <template #default="{ row }">
-            <el-button v-if="row.status === 1 && row.role !== 'LEADER'" type="danger" size="small" @click="handleQuit(row.clubId)">退出社团</el-button>
+            <el-button v-if="row.status === 1 && row.role !== 'ADMIN'" type="danger" size="small" @click="handleQuit(row.clubId)">退出社团</el-button>
           </template>
         </el-table-column>
       </el-table>
