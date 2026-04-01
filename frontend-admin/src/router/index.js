@@ -117,6 +117,21 @@ router.beforeEach((to, from, next) => {
     return
   }
   
+  // 确保用户信息已加载
+  if (!userStore.user) {
+    userStore.fetchUserInfo().then(() => {
+      // 检查角色权限
+      if (to.meta.roles && !to.meta.roles.includes(userStore.user?.role)) {
+        next('/dashboard')
+        return
+      }
+      next()
+    }).catch(() => {
+      next('/login')
+    })
+    return
+  }
+  
   // 检查角色权限
   if (to.meta.roles && !to.meta.roles.includes(userStore.user?.role)) {
     next('/dashboard')

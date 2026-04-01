@@ -3,7 +3,7 @@
     <div class="page-card">
       <div class="card-header">
         <span class="card-title">{{ isAdmin ? '社团管理' : '社团列表' }}</span>
-        <el-button type="primary" @click="openCreateDialog">
+        <el-button v-if="canCreateClub" type="primary" @click="openCreateDialog">
           <el-icon><Plus /></el-icon>创建社团
         </el-button>
       </div>
@@ -47,11 +47,11 @@
         <el-table-column label="操作" min-width="220" fixed="right">
           <template #default="{ row }">
             <div class="op-btns">
-              <el-button v-if="row.status === 0 && isAdmin" type="success" size="small" @click="handleAudit(row.id, 1)">通过</el-button>
-              <el-button v-if="row.status === 0 && isAdmin" type="danger" size="small" @click="handleAudit(row.id, 2)">拒绝</el-button>
-              <el-button v-if="canManage(row)" type="primary" size="small" @click="openEditDialog(row)">编辑</el-button>
-              <el-button v-if="!canManage(row) && row.status === 1" type="primary" size="small" plain @click="openDetailDialog(row.id)">详情</el-button>
-              <el-button v-if="isAdmin" type="danger" size="small" plain @click="handleDelete(row.id)">删除</el-button>
+              <el-button v-if="hasAuditPermission" type="success" size="small" @click="handleAudit(row.id, 1)">通过</el-button>
+              <el-button v-if="hasAuditPermission" type="danger" size="small" @click="handleAudit(row.id, 2)">拒绝</el-button>
+              <el-button v-if="hasEditPermission(row)" type="primary" size="small" @click="openEditDialog(row)">编辑</el-button>
+              <el-button v-if="row.status === 1" type="primary" size="small" plain @click="openDetailDialog(row.id)">详情</el-button>
+              <el-button v-if="hasDeletePermission" type="danger" size="small" plain @click="handleDelete(row.id)">删除</el-button>
             </div>
           </template>
         </el-table-column>
@@ -161,7 +161,11 @@ const isAdmin = computed(() => userStore.user?.role === 'ADMIN')
 
 const formatDate = (date) => dayjs(date).format('YYYY-MM-DD HH:mm')
 
-const canManage = (club) => {
+const hasAuditPermission = computed(() => isAdmin.value)
+const hasDeletePermission = computed(() => isAdmin.value)
+const canCreateClub = computed(() => true)
+
+const hasEditPermission = (club) => {
   if (isAdmin.value) return true
   return myManagedClubIds.value.includes(club.id)
 }

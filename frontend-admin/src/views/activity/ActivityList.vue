@@ -47,9 +47,9 @@
             <div class="op-btns">
               <el-button v-if="row.status === 1 && !row.registered" type="success" size="small" @click="handleRegister(row)" :loading="row.registering">报名</el-button>
               <el-button v-if="row.status === 1 && row.registered" type="warning" size="small" @click="handleCancelRegister(row)" :loading="row.canceling">取消</el-button>
-              <el-button v-if="canManageActivity(row)" type="info" size="small" @click="showRegistrations(row)">名单</el-button>
-              <el-button v-if="canManageActivity(row)" type="primary" size="small" @click="openEditDialog(row)">编辑</el-button>
-              <el-button v-if="canManageActivity(row)" type="danger" size="small" plain @click="handleDelete(row.id)">删除</el-button>
+              <el-button v-if="hasViewRegistrationsPermission(row)" type="info" size="small" @click="showRegistrations(row)">名单</el-button>
+              <el-button v-if="hasEditActivityPermission(row)" type="primary" size="small" @click="openEditDialog(row)">编辑</el-button>
+              <el-button v-if="hasDeleteActivityPermission(row)" type="danger" size="small" plain @click="handleDelete(row.id)">删除</el-button>
             </div>
           </template>
         </el-table-column>
@@ -211,7 +211,17 @@ const getStatusText = (status) => {
   return texts[status] || ''
 }
 
-const canManageActivity = (activity) => {
+const hasViewRegistrationsPermission = (activity) => {
+  if (isAdmin.value) return true
+  return myManagedClubIds.value.includes(activity.clubId)
+}
+
+const hasEditActivityPermission = (activity) => {
+  if (isAdmin.value) return true
+  return myManagedClubIds.value.includes(activity.clubId)
+}
+
+const hasDeleteActivityPermission = (activity) => {
   if (isAdmin.value) return true
   return myManagedClubIds.value.includes(activity.clubId)
 }

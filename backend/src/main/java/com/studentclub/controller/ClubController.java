@@ -1,5 +1,6 @@
 package com.studentclub.controller;
 
+import com.studentclub.annotation.RequiresAdmin;
 import com.studentclub.common.PageResult;
 import com.studentclub.common.Result;
 import com.studentclub.dto.ClubDTO;
@@ -40,12 +41,9 @@ public class ClubController {
         return Result.success();
     }
     
+    @RequiresAdmin
     @DeleteMapping("/{id}")
-    public Result<Void> deleteClub(@PathVariable Long id, HttpServletRequest request) {
-        String role = (String) request.getAttribute("role");
-        if (!"ADMIN".equals(role)) {
-            throw new RuntimeException("只有管理员可以删除社团");
-        }
+    public Result<Void> deleteClub(@PathVariable Long id) {
         clubService.deleteClub(id);
         return Result.success();
     }
@@ -68,12 +66,9 @@ public class ClubController {
         return Result.success(clubService.pageClubs(page, size, keyword, status, scope, userId, role));
     }
     
+    @RequiresAdmin
     @PutMapping("/{id}/audit")
-    public Result<Void> auditClub(@PathVariable Long id, @RequestParam Integer status, HttpServletRequest request) {
-        String role = (String) request.getAttribute("role");
-        if (!"ADMIN".equals(role)) {
-            throw new RuntimeException("只有管理员可以审核社团");
-        }
+    public Result<Void> auditClub(@PathVariable Long id, @RequestParam Integer status) {
         clubService.auditClub(id, status);
         return Result.success();
     }

@@ -1,6 +1,7 @@
 package com.studentclub.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.studentclub.annotation.RequiresAdmin;
 import com.studentclub.common.Result;
 import com.studentclub.entity.Activity;
 import com.studentclub.entity.Club;

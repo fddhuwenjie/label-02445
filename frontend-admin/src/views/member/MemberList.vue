@@ -42,9 +42,9 @@
         <el-table-column label="操作" width="220" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" size="small" link @click="handleView(row)">查看</el-button>
-            <el-button v-if="row.status === 0" type="success" size="small" @click="handleAudit(row.id, 1)">通过</el-button>
-            <el-button v-if="row.status === 0" type="danger" size="small" @click="handleAudit(row.id, 2)">拒绝</el-button>
-            <el-button v-if="row.status === 1 && row.role !== 'ADMIN'" type="danger" size="small" @click="handleRemove(row.id)">移除</el-button>
+            <el-button v-if="hasAuditPermission(row) && row.status === 0" type="success" size="small" @click="handleAudit(row.id, 1)">通过</el-button>
+            <el-button v-if="hasAuditPermission(row) && row.status === 0" type="danger" size="small" @click="handleAudit(row.id, 2)">拒绝</el-button>
+            <el-button v-if="hasRemovePermission(row) && row.status === 1 && row.role !== 'ADMIN'" type="danger" size="small" @click="handleRemove(row.id)">移除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -146,6 +146,16 @@ const getStatusType = (status) => {
 const getStatusText = (status) => {
   const texts = { 0: '待审核', 1: '已加入', 2: '已拒绝', 3: '已退出' }
   return texts[status] || ''
+}
+
+const hasAuditPermission = (row) => {
+  // 当前选择的社团就是用户管理的社团
+  return true
+}
+
+const hasRemovePermission = (row) => {
+  // 当前选择的社团就是用户管理的社团
+  return true
 }
 
 const fetchMyClubs = async () => {

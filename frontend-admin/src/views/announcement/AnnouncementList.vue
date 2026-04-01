@@ -24,8 +24,8 @@
         <el-table-column label="操作" width="180">
           <template #default="{ row }">
             <el-button type="primary" size="small" link @click="showDetail(row)">查看</el-button>
-            <el-button v-if="canManage(row)" type="warning" size="small" link @click="showDialog(row)">编辑</el-button>
-            <el-button v-if="canManage(row)" type="danger" size="small" link @click="handleDelete(row.id)">删除</el-button>
+            <el-button v-if="hasEditAnnouncementPermission(row)" type="warning" size="small" link @click="showDialog(row)">编辑</el-button>
+            <el-button v-if="hasDeleteAnnouncementPermission(row)" type="danger" size="small" link @click="handleDelete(row.id)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -62,7 +62,7 @@
           <el-input v-model="form.title" placeholder="请输入公告标题" />
         </el-form-item>
         <el-form-item label="所属社团" prop="clubId">
-          <el-select v-model="form.clubId" placeholder="不选则为系统公告" style="width: 100%" clearable>
+          <el-select v-model="form.clubId" :placeholder="canPublishSystemAnnouncement ? '不选则为系统公告' : '请选择社团'" style="width: 100%" :disabled="!canPublishSystemAnnouncement" :clearable="canPublishSystemAnnouncement">
             <el-option v-for="club in myClubs" :key="club.id" :label="club.name" :value="club.id" />
           </el-select>
         </el-form-item>
@@ -116,12 +116,22 @@ const rules = {
 
 const isAdmin = computed(() => userStore.user?.role === 'ADMIN')
 const canPublish = computed(() => isAdmin.value || myManagedClubIds.value.length > 0)
+const canPublishSystemAnnouncement = computed(() => isAdmin.value)
 
-const canManage = (row) => {
+const hasEditAnnouncementPermission = (row) => {
   if (isAdmin.value) return true
-  // 社团公告：社团管理员可以管理
-  if (row.clubId && myManagedClubIds.value.includes(row.clubId)) return true
-  return false
+  // 系统公告只有管理员可以编辑
+  if (!row.clubId) return false
+  // 社团公告：社团管理员可以编辑
+  return myManagedClubIds.value.includes(row.clubId)
+}
+
+const hasDeleteAnnouncementPermission = (row) => {
+  if (isAdmin.value) return true
+  // 系统公告只有管理员可以删除
+  if (!row.clubId) return false
+  // 社团公告：社团管理员可以删除
+  return myManagedClubIds.value.includes(row.clubId)
 }
 
 const formatDate = (date) => dayjs(date).format('YYYY-MM-DD HH:mm')
