@@ -1,6 +1,7 @@
 package com.studentclub.config;
 
 import com.studentclub.interceptor.AuthInterceptor;
+import com.studentclub.interceptor.PermissionInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -15,6 +16,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig implements WebMvcConfigurer {
     
     private final AuthInterceptor authInterceptor;
+    private final PermissionInterceptor permissionInterceptor;
     
     @Override
     public void addCorsMappings(CorsRegistry registry) {
@@ -34,5 +36,8 @@ public class WebConfig implements WebMvcConfigurer {
                         "/api/auth/login",
                         "/api/auth/register"
                 );
+        
+        registry.addInterceptor(permissionInterceptor)
+                .addPathPatterns("/api/**");
     }
 }

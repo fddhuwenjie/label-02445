@@ -33,12 +33,15 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { useUserStore } from '../../stores/user'
 import api from '../../api'
 
 const route = useRoute()
 const router = useRouter()
+const userStore = useUserStore()
 
 const isEdit = computed(() => !!route.params.id)
+const isAdmin = computed(() => userStore.user?.role === 'ADMIN')
 const formRef = ref()
 const loading = ref(false)
 const categories = ref([])
@@ -61,8 +64,28 @@ const fetchCategories = async () => {
   categories.value = res.data
 }
 
+const checkEditPermission = async () => {
+  if (!isEdit.value) return true
+  
+  if (isAdmin.value) return true
+  
+  try {
+    const res = await api.get(`/api/memberships/check-admin/${route.params.id}`)
+    if (!res.data) {
+      router.push('/clubs')
+      return false
+    }
+    return true
+  } catch {
+    router.push('/clubs')
+    return false
+  }
+}
+
 const fetchClub = async () => {
   if (!route.params.id) return
+  const hasPermission = await checkEditPermission()
+  if (!hasPermission) return
   const res = await api.get(`/api/clubs/detail/${route.params.id}`)
   Object.assign(form, res.data)
 }

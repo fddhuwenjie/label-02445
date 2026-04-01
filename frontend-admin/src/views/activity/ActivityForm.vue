@@ -43,12 +43,15 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { useUserStore } from '../../stores/user'
 import api from '../../api'
 
 const route = useRoute()
 const router = useRouter()
+const userStore = useUserStore()
 
 const isEdit = computed(() => !!route.params.id)
+const isAdmin = computed(() => userStore.user?.role === 'ADMIN')
 const formRef = ref()
 const loading = ref(false)
 const myClubs = ref([])
@@ -76,8 +79,30 @@ const fetchMyClubs = async () => {
   myClubs.value = res.data
 }
 
+const checkEditPermission = async () => {
+  if (!isEdit.value) return true
+  
+  if (isAdmin.value) return true
+  
+  try {
+    const detailRes = await api.get(`/api/activities/detail/${route.params.id}`)
+    const clubId = detailRes.data.clubId
+    const res = await api.get(`/api/memberships/check-admin/${clubId}`)
+    if (!res.data) {
+      router.push('/activities')
+      return false
+    }
+    return true
+  } catch {
+    router.push('/activities')
+    return false
+  }
+}
+
 const fetchActivity = async () => {
   if (!route.params.id) return
+  const hasPermission = await checkEditPermission()
+  if (!hasPermission) return
   const res = await api.get(`/api/activities/detail/${route.params.id}`)
   Object.assign(form, res.data)
 }
