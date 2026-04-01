@@ -1,12 +1,16 @@
 package com.studentclub.interceptor;
 
+import com.studentclub.annotation.RequiresAdmin;
 import com.studentclub.util.JwtUtil;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
+
+import java.lang.reflect.Method;
 
 /**
  * 认证拦截器
@@ -46,10 +50,29 @@ public class AuthInterceptor implements HandlerInterceptor {
                 return false;
             }
             
+            Long userId = jwtUtil.getUserId(token);
+            String username = jwtUtil.getUsername(token);
+            String role = jwtUtil.getRole(token);
+            
             // 将用户信息存入request
-            request.setAttribute("userId", jwtUtil.getUserId(token));
-            request.setAttribute("username", jwtUtil.getUsername(token));
-            request.setAttribute("role", jwtUtil.getRole(token));
+            request.setAttribute("userId", userId);
+            request.setAttribute("username", username);
+            request.setAttribute("role", role);
+            
+            // 检查管理员权限注解
+            if (handler instanceof HandlerMethod) {
+                HandlerMethod handlerMethod = (HandlerMethod) handler;
+                Method method = handlerMethod.getMethod();
+                
+                if (method.isAnnotationPresent(RequiresAdmin.class)) {
+                    if (!"ADMIN".equals(role)) {
+                        response.setStatus(403);
+                        response.setContentType("application/json;charset=UTF-8");
+                        response.getWriter().write("{\"code\":403,\"message\":\"无权限操作\"}");
+                        return false;
+                    }
+                }
+            }
             
             return true;
         } catch (Exception e) {
