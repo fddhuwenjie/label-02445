@@ -104,8 +104,15 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { useUserStore } from '../../stores/user'
+import { useRouter } from 'vue-router'
 import api from '../../api'
 import dayjs from 'dayjs'
+
+const userStore = useUserStore()
+const router = useRouter()
+
+const isAdmin = computed(() => userStore.user?.role === 'ADMIN')
 
 const myClubs = ref([])
 const members = ref([])
@@ -149,6 +156,19 @@ const getStatusText = (status) => {
 }
 
 const fetchMyClubs = async () => {
+  if (!isAdmin.value) {
+    try {
+      const membershipRes = await api.get('/api/memberships/my', { params: { page: 1, size: 100, status: 1 } })
+      const hasManagedClubs = membershipRes.data.records.some(m => m.role === 'ADMIN')
+      if (!hasManagedClubs) {
+        router.push('/dashboard')
+        return
+      }
+    } catch {
+      router.push('/dashboard')
+      return
+    }
+  }
   const res = await api.get('/api/clubs/my')
   myClubs.value = res.data
   if (myClubs.value.length > 0) {

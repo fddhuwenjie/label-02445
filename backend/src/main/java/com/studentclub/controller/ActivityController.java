@@ -5,6 +5,7 @@ import com.studentclub.common.Result;
 import com.studentclub.dto.ActivityDTO;
 import com.studentclub.entity.Activity;
 import com.studentclub.entity.Registration;
+import com.studentclub.exception.PermissionException;
 import com.studentclub.service.ActivityService;
 import com.studentclub.service.MembershipService;
 import javax.servlet.http.HttpServletRequest;
@@ -120,7 +121,7 @@ public class ActivityController {
             return;
         }
         if (!membershipService.isClubAdmin(clubId, userId)) {
-            throw new RuntimeException("无权限操作");
+            throw new PermissionException("无权限操作");
         }
     }
 }

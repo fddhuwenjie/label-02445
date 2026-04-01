@@ -3,6 +3,7 @@ package com.studentclub.controller;
 import com.studentclub.common.PageResult;
 import com.studentclub.common.Result;
 import com.studentclub.entity.Membership;
+import com.studentclub.exception.PermissionException;
 import com.studentclub.service.MembershipService;
 import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -91,7 +92,7 @@ public class MembershipController {
         String role = (String) request.getAttribute("role");
         // 只有社团成员、社团管理员或系统管理员可以查看成员列表
         if (!"ADMIN".equals(role) && !membershipService.isMember(clubId, userId) && !membershipService.isClubAdmin(clubId, userId)) {
-            throw new RuntimeException("无权查看该社团成员列表");
+            throw new PermissionException("无权查看该社团成员列表");
         }
         return Result.success(membershipService.getClubMembers(clubId, page, size, status));
     }
@@ -127,7 +128,7 @@ public class MembershipController {
             return;
         }
         if (!membershipService.isClubAdmin(clubId, userId)) {
-            throw new RuntimeException("无权限操作");
+            throw new PermissionException("无权限操作");
         }
     }
 }

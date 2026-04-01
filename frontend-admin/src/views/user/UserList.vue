@@ -159,10 +159,17 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { useUserStore } from '../../stores/user'
+import { useRouter } from 'vue-router'
 import api from '../../api'
 import dayjs from 'dayjs'
+
+const userStore = useUserStore()
+const router = useRouter()
+
+const isAdmin = computed(() => userStore.user?.role === 'ADMIN')
 
 const users = ref([])
 const loading = ref(false)
@@ -285,5 +292,11 @@ const handleDelete = async (id) => {
   fetchData()
 }
 
-onMounted(fetchData)
+onMounted(() => {
+  if (!isAdmin.value) {
+    router.push('/dashboard')
+    return
+  }
+  fetchData()
+})
 </script>
