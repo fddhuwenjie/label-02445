@@ -1,5 +1,6 @@
 package com.studentclub.controller;
 
+import com.studentclub.annotation.RequiresAdmin;
 import com.studentclub.common.PageResult;
 import com.studentclub.common.Result;
 import com.studentclub.entity.User;
@@ -42,14 +43,13 @@ public class UserController {
     }
     
     @GetMapping("/list")
+    @RequiresAdmin
     public Result<PageResult<User>> listUsers(
-            HttpServletRequest request,
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer size,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String role,
             @RequestParam(required = false) Integer status) {
-        checkAdmin(request);
         return Result.success(userService.pageUsers(page, size, keyword, role, status));
     }
     
@@ -61,29 +61,29 @@ public class UserController {
     }
     
     @PostMapping("/add")
-    public Result<Void> addUser(@RequestBody User user, HttpServletRequest request) {
-        checkAdmin(request);
+    @RequiresAdmin
+    public Result<Void> addUser(@RequestBody User user) {
         userService.addUser(user);
         return Result.success("添加成功", null);
     }
     
     @PutMapping("/update")
-    public Result<Void> updateUser(@RequestBody User user, HttpServletRequest request) {
-        checkAdmin(request);
+    @RequiresAdmin
+    public Result<Void> updateUser(@RequestBody User user) {
         userService.updateUser(user);
         return Result.success();
     }
     
     @PutMapping("/{id}/status")
-    public Result<Void> updateStatus(@PathVariable Long id, @RequestParam Integer status, HttpServletRequest request) {
-        checkAdmin(request);
+    @RequiresAdmin
+    public Result<Void> updateStatus(@PathVariable Long id, @RequestParam Integer status) {
         userService.updateStatus(id, status);
         return Result.success();
     }
     
     @DeleteMapping("/{id}")
-    public Result<Void> deleteUser(@PathVariable Long id, HttpServletRequest request) {
-        checkAdmin(request);
+    @RequiresAdmin
+    public Result<Void> deleteUser(@PathVariable Long id) {
         // 不能删除管理员
         User user = userService.getById(id);
         if (user != null && "ADMIN".equals(user.getRole())) {
@@ -91,12 +91,5 @@ public class UserController {
         }
         userService.removeById(id);
         return Result.success();
-    }
-    
-    private void checkAdmin(HttpServletRequest request) {
-        String role = (String) request.getAttribute("role");
-        if (!"ADMIN".equals(role)) {
-            throw new RuntimeException("无权限操作");
-        }
     }
 }

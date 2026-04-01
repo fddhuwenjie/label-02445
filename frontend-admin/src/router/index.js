@@ -33,7 +33,7 @@ const routes = [
         path: 'clubs/create',
         name: 'ClubCreate',
         component: () => import('../views/club/ClubForm.vue'),
-        meta: { title: '创建社团' }
+        meta: { title: '创建社团', requiresAuth: true }
       },
       {
         path: 'clubs/:id',
@@ -45,7 +45,7 @@ const routes = [
         path: 'clubs/:id/edit',
         name: 'ClubEdit',
         component: () => import('../views/club/ClubForm.vue'),
-        meta: { title: '编辑社团' }
+        meta: { title: '编辑社团', requiresAuth: true }
       },
       {
         path: 'members',
@@ -69,13 +69,13 @@ const routes = [
         path: 'activities/create',
         name: 'ActivityCreate',
         component: () => import('../views/activity/ActivityForm.vue'),
-        meta: { title: '创建活动' }
+        meta: { title: '创建活动', requiresAuth: true }
       },
       {
         path: 'activities/:id/edit',
         name: 'ActivityEdit',
         component: () => import('../views/activity/ActivityForm.vue'),
-        meta: { title: '编辑活动' }
+        meta: { title: '编辑活动', requiresAuth: true }
       },
       {
         path: 'users',

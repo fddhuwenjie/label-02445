@@ -33,15 +33,19 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { useUserStore } from '../../stores/user'
 import api from '../../api'
 
 const route = useRoute()
 const router = useRouter()
+const userStore = useUserStore()
 
 const isEdit = computed(() => !!route.params.id)
 const formRef = ref()
 const loading = ref(false)
+const checkingPermission = ref(true)
 const categories = ref([])
+const myManagedClubIds = ref([])
 
 const form = reactive({
   id: null,
@@ -54,6 +58,34 @@ const form = reactive({
 const rules = {
   name: [{ required: true, message: '请输入社团名称', trigger: 'blur' }],
   category: [{ required: true, message: '请选择社团类别', trigger: 'change' }]
+}
+
+const isAdmin = computed(() => userStore.user?.role === 'ADMIN')
+
+const checkPermission = async () => {
+  checkingPermission.value = true
+  try {
+    if (isAdmin.value) {
+      return true
+    }
+
+    const res = await api.get('/api/memberships/my', { params: { page: 1, size: 100, status: 1 } })
+    myManagedClubIds.value = res.data.records
+      .filter(m => m.role === 'ADMIN')
+      .map(m => m.clubId)
+
+    if (isEdit.value) {
+      if (!myManagedClubIds.value.includes(parseInt(route.params.id))) {
+        return false
+      }
+    }
+
+    return true
+  } catch {
+    return false
+  } finally {
+    checkingPermission.value = false
+  }
 }
 
 const fetchCategories = async () => {
@@ -84,7 +116,13 @@ const handleSubmit = async () => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
+  const hasPermission = await checkPermission()
+  if (!hasPermission) {
+    ElMessage.error('无权限操作')
+    router.push('/clubs')
+    return
+  }
   fetchCategories()
   fetchClub()
 })
